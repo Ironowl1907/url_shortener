@@ -1,4 +1,4 @@
-package models
+package user
 
 import (
 	"time"
@@ -10,6 +10,4 @@ type User struct {
 	Email     string    `gorm:"type:varchar(255);unique;not null"`
 	Password  string    `gorm:"type:text;not null"`
 	CreatedAt time.Time `gorm:"default:current_timestamp"`
-
-	URLs []ShortenedURL `gorm:"foreignKey:OwnerID"` // One-to-many relationship
 }
