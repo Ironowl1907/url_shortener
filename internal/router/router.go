@@ -7,7 +7,7 @@ import (
 	"github.com/ironowl1907/url_shortener/internal/user"
 )
 
-func InitRouting(router *gin.Engine) {
+func SetupRoutes(router *gin.Engine) {
 	auth.Route(router)
 	user.Route(router)
 	url.Route(router)

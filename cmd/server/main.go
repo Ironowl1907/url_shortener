@@ -21,7 +21,7 @@ func main() {
 	})
 
 	// Application Routing
-	router.InitRouting(ginRouter)
+	router.SetupRoutes(ginRouter)
 
 	// Run the server
 	ginRouter.Run()
