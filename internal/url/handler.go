@@ -18,12 +18,12 @@ func Route(router *gin.Engine, dbConnection *gorm.DB) {
 			c.JSON(400, gin.H{"error": "Invalid JSON"})
 			return
 		}
-		_, err := CreateURL(&url, dbConnection)
+		shortend_url, err := CreateURL(&url, dbConnection)
 		if err != nil {
 			c.JSON(500, gin.H{"status": "Server error", "url": url})
 		}
 
-		c.JSON(200, gin.H{"status": "received", "url": url})
+		c.JSON(200, gin.H{"status": "received", "url": url, "short_code": shortend_url.ShortCode})
 	})
 
 	router.GET("/urls", func(c *gin.Context) {
