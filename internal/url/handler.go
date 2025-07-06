@@ -1,6 +1,7 @@
 package url
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
@@ -50,14 +51,30 @@ func Route(router *gin.Engine, dbConnection *gorm.DB) {
 	})
 	router.GET("/:shortCode", func(c *gin.Context) {
 		id := c.Param("shortCode")
-		var url string
-		err := dbConnection.Raw("SELECT original_url FROM shortened_urls WHERE short_code = ?",
-			id).Scan(&url).Error
-		if err != nil {
-			log.Fatal(err)
+
+		var result struct {
+			OriginalURL string `gorm:"column:original_url"`
 		}
+
+		err := dbConnection.Raw("SELECT original_url FROM shortened_urls WHERE short_code = ?",
+			id).First(&result).Error
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				fmt.Println("Short code not found for this URL")
+				c.JSON(404, gin.H{
+					"message": "Code not found",
+				})
+			} else {
+				log.Printf("Database error: %v", err)
+				c.JSON(500, gin.H{
+					"message": "Internal server error",
+				})
+			}
+			return
+		}
+
 		c.JSON(200, gin.H{
-			"message": url,
+			"message": result.OriginalURL,
 		})
 	})
 }
