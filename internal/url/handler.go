@@ -2,6 +2,7 @@ package url
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -48,9 +49,15 @@ func Route(router *gin.Engine, dbConnection *gorm.DB) {
 		})
 	})
 	router.GET("/:shortCode", func(c *gin.Context) {
-		// id := c.Param("id")
-		c.JSON(501, gin.H{
-			"message": "GET /:shortCode",
+		id := c.Param("shortCode")
+		var url string
+		err := dbConnection.Raw("SELECT original_url FROM shortened_urls WHERE short_code = ?",
+			id).Scan(&url).Error
+		if err != nil {
+			log.Fatal(err)
+		}
+		c.JSON(200, gin.H{
+			"message": url,
 		})
 	})
 }
