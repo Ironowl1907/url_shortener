@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -73,8 +74,6 @@ func Route(router *gin.Engine, dbConnection *gorm.DB) {
 			return
 		}
 
-		c.JSON(200, gin.H{
-			"message": result.OriginalURL,
-		})
+		c.Redirect(http.StatusMovedPermanently, result.OriginalURL)
 	})
 }
