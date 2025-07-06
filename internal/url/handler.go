@@ -4,17 +4,23 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
-func Route(router *gin.Engine) {
+func Route(router *gin.Engine, dbConnection *gorm.DB) {
 	fmt.Println("Init url routing")
 
 	router.POST("/urls", func(c *gin.Context) {
 		var url URLPost
-		if err := c.ShouldBindBodyWithJSON(url); err != nil {
+		if err := c.ShouldBindBodyWithJSON(&url); err != nil {
 			c.JSON(400, gin.H{"error": "Invalid JSON"})
 			return
 		}
+		_, err := CreateURL(&url, dbConnection)
+		if err != nil {
+			c.JSON(500, gin.H{"status": "Server error", "url": url})
+		}
+
 		c.JSON(200, gin.H{"status": "received", "url": url})
 	})
 

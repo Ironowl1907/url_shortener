@@ -8,7 +8,7 @@ import (
 
 func main() {
 	// Connect to the local instance of postgres
-	dbIntance, err := db.InitDB()
+	dbConnection, err := db.InitDB()
 	if err != nil {
 		panic("Couldn't Open Database")
 	}
@@ -24,7 +24,7 @@ func main() {
 	})
 
 	// Application Routing
-	router.SetupRoutes(ginRouter)
+	router.SetupRoutes(ginRouter, dbConnection)
 
 	// Run the server
 	ginRouter.Run()

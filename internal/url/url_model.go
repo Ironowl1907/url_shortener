@@ -2,20 +2,17 @@ package url
 
 import (
 	"time"
-
-	"github.com/ironowl1907/url_shortener/internal/user"
 )
 
-type ShortenedURL struct {
-	ID          uint      `gorm:"primaryKey"`
-	OriginalURL string    `gorm:"type:text;not null"`
-	ShortCode   string    `gorm:"type:varchar(16);unique;not null"`
-	CreatedAt   time.Time `gorm:"default:current_timestamp"`
-
-	OwnerID *uint      `gorm:"index"`                         // Foreign key
-	Owner   *user.User `gorm:"constraint:OnDelete:SET NULL;"` // Soft relation
+type ShortenedUrl struct {
+	ID          uint      `gorm:"primarykey" json:"id"`
+	OriginalURL string    `gorm:"not null" json:"original_url"`
+	ShortCode   string    `gorm:"unique;not null" json:"short_code"`
+	CreatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
+	// UserOwner   *user.User `gorm:"foreignKey:Owner;references:ID;constraint:OnDelete:SET NULL"` // Relationship
 }
 
 type URLPost struct {
-	OriginalURL string `json:"URL"`
+	OriginalURL string `json:"url"`
+	Owner       *uint  `json:"owner"`
 }
