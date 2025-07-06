@@ -10,10 +10,14 @@ func Route(router *gin.Engine) {
 	fmt.Println("Init url routing")
 
 	router.POST("/urls", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "POST /urls",
-		})
+		var url URLPost
+		if err := c.ShouldBindBodyWithJSON(url); err != nil {
+			c.JSON(400, gin.H{"error": "Invalid JSON"})
+			return
+		}
+		c.JSON(200, gin.H{"status": "received", "url": url})
 	})
+
 	router.GET("/urls", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "GET /urls",

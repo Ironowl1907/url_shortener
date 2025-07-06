@@ -15,3 +15,7 @@ type ShortenedURL struct {
 	OwnerID *uint      `gorm:"index"`                         // Foreign key
 	Owner   *user.User `gorm:"constraint:OnDelete:SET NULL;"` // Soft relation
 }
+
+type URLPost struct {
+	OriginalURL string `json:"URL"`
+}

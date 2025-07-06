@@ -8,7 +8,10 @@ import (
 
 func main() {
 	// Connect to the local instance of postgres
-	_ = db.InitDB()
+	dbIntance, err := db.InitDB()
+	if err != nil {
+		panic("Couldn't Open Database")
+	}
 
 	// Routing with gin
 	ginRouter := gin.Default()
