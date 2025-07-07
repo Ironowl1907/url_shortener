@@ -28,9 +28,9 @@ func Route(router *gin.Engine, dbConnection *gorm.DB) {
 	})
 
 	router.GET("/urls", func(c *gin.Context) {
-		c.JSON(501, gin.H{
-			"message": "GET /urls",
-		})
+		var urls []ShortenedUrl
+		dbConnection.Find(&urls)
+		c.JSON(200, urls)
 	})
 	router.GET("/urls:id", func(c *gin.Context) {
 		// id := c.Param("id")
