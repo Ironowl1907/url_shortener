@@ -32,11 +32,16 @@ func Route(router *gin.Engine, dbConnection *gorm.DB) {
 		dbConnection.Find(&urls)
 		c.JSON(200, urls)
 	})
-	router.GET("/urls:id", func(c *gin.Context) {
-		// id := c.Param("id")
-		c.JSON(501, gin.H{
-			"message": "GET /urls:id",
-		})
+
+	router.GET("/urls/:id", func(c *gin.Context) {
+		id := c.Param("id")
+		var urls []ShortenedUrl
+		err := dbConnection.Raw("SELECT * FROM shortened_urls WHERE id = ?", id).Scan(&urls).Error
+		if err != nil {
+			c.JSON(500, gin.H{"status": "Server error", "error": err})
+			return
+		}
+		c.JSON(200, urls)
 	})
 	router.PUT("/urls:id", func(c *gin.Context) {
 		// id := c.Param("id")
@@ -44,7 +49,7 @@ func Route(router *gin.Engine, dbConnection *gorm.DB) {
 			"message": "PUT /urls:id",
 		})
 	})
-	router.DELETE("/urls:id", func(c *gin.Context) {
+	router.DELETE("/urls/:id", func(c *gin.Context) {
 		// id := c.Param("id")
 		c.JSON(501, gin.H{
 			"message": "DELETE /urls:id",
