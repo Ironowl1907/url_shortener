@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -22,6 +23,7 @@ func Route(router *gin.Engine, dbConnection *gorm.DB) {
 		_, err := CreateURL(&url, dbConnection)
 		if err != nil {
 			c.JSON(500, gin.H{"status": "Server error", "url": url})
+			return
 		}
 
 		c.JSON(200, gin.H{"status": "received", "url": url})
@@ -43,11 +45,57 @@ func Route(router *gin.Engine, dbConnection *gorm.DB) {
 		}
 		c.JSON(200, urls)
 	})
-	router.PUT("/urls:id", func(c *gin.Context) {
-		// id := c.Param("id")
-		c.JSON(501, gin.H{
-			"message": "PUT /urls:id",
-		})
+	router.PUT("/urls/:id", func(c *gin.Context) {
+		id := c.Param("id")
+		var recievedURL ShortenedUrl
+		var url ShortenedUrl
+		{
+			err := c.ShouldBindBodyWithJSON(&recievedURL) // Added & here
+			if err != nil {
+				c.JSON(400, gin.H{"status": "incorrect fields", "error": err.Error()})
+				return
+			}
+		}
+		{
+			err := dbConnection.First(&url, id).Error
+			if err != nil {
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					c.JSON(404, gin.H{"status": "URL not found"})
+					return
+				}
+				c.JSON(500, gin.H{"status": "Server error", "error": err.Error()})
+				return
+			}
+		}
+
+		updates := make(map[string]interface{})
+
+		if recievedURL.OriginalURL != "" {
+			updates["original_url"] = recievedURL.OriginalURL
+		}
+		if recievedURL.ShortCode != "" {
+			updates["short_code"] = recievedURL.ShortCode
+		}
+
+		updates["updated_at"] = time.Now()
+
+		{
+			err := dbConnection.Model(&url).Updates(updates).Error
+			if err != nil {
+				c.JSON(500, gin.H{"status": "Update failed", "error": err.Error()})
+				return
+			}
+		}
+
+		{
+			err := dbConnection.First(&url, id).Error
+			if err != nil {
+				c.JSON(500, gin.H{"status": "Server error", "error": err.Error()})
+				return
+			}
+		}
+
+		c.JSON(200, gin.H{"status": "success", "data": url})
 	})
 	router.DELETE("/urls/:id", func(c *gin.Context) {
 		id := c.Param("id")
