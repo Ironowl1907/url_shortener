@@ -14,6 +14,7 @@ type ShortenedUrl struct {
 }
 
 type URLPost struct {
-	OriginalURL string `json:"url"`
-	Owner       *uint  `json:"owner"`
+	OriginalURL    string `json:"url"`
+	Owner          *uint  `json:"owner"`
+	IgnoreResponse bool   `json:"ignore_response"`
 }
