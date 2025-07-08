@@ -15,18 +15,29 @@ func Route(router *gin.Engine, dbConnection *gorm.DB) {
 	fmt.Println("Init url routing")
 
 	router.POST("/urls", func(c *gin.Context) {
-		var url URLPost
-		if err := c.ShouldBindBodyWithJSON(&url); err != nil {
+		var incomeURL URLPost
+		if err := c.ShouldBindBodyWithJSON(&incomeURL); err != nil {
 			c.JSON(400, gin.H{"error": "Invalid JSON"})
 			return
 		}
-		_, err := CreateURL(&url, dbConnection)
+		{
+			response, err := http.Get(incomeURL.OriginalURL)
+			fmt.Println(incomeURL.IgnoreResponse)
+			if !incomeURL.IgnoreResponse {
+				if err != nil || response.StatusCode != 200 {
+					c.JSON(401, gin.H{"status": "warning, url not reachable", "url": incomeURL})
+					return
+				}
+			}
+		}
+
+		_, err := CreateURL(&incomeURL, dbConnection)
 		if err != nil {
-			c.JSON(500, gin.H{"status": "Server error", "url": url})
+			c.JSON(500, gin.H{"status": "Server error", "error": err.Error()})
 			return
 		}
 
-		c.JSON(200, gin.H{"status": "received", "url": url})
+		c.JSON(200, gin.H{"status": "received", "url": incomeURL})
 	})
 
 	router.GET("/urls", func(c *gin.Context) {
@@ -128,7 +139,7 @@ func Route(router *gin.Engine, dbConnection *gorm.DB) {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				fmt.Println("Short code not found for this URL")
 				c.JSON(404, gin.H{
-					"message": "Code not found",
+					"message": "Invalid code",
 				})
 			} else {
 				log.Printf("Database error: %v", err)
