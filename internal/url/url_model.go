@@ -9,6 +9,7 @@ type ShortenedUrl struct {
 	OriginalURL string    `gorm:"not null" json:"original_url"`
 	ShortCode   string    `gorm:"unique;not null" json:"short_code"`
 	CreatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 	// UserOwner   *user.User `gorm:"foreignKey:Owner;references:ID;constraint:OnDelete:SET NULL"` // Relationship
 }
 
