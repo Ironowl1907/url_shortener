@@ -45,12 +45,13 @@ func Route(router *gin.Engine, dbConnection *gorm.DB) {
 		}
 		c.JSON(200, urls)
 	})
+
 	router.PUT("/urls/:id", func(c *gin.Context) {
 		id := c.Param("id")
 		var recievedURL ShortenedUrl
 		var url ShortenedUrl
 		{
-			err := c.ShouldBindBodyWithJSON(&recievedURL) // Added & here
+			err := c.ShouldBindBodyWithJSON(&recievedURL)
 			if err != nil {
 				c.JSON(400, gin.H{"status": "incorrect fields", "error": err.Error()})
 				return
@@ -74,6 +75,10 @@ func Route(router *gin.Engine, dbConnection *gorm.DB) {
 			updates["original_url"] = recievedURL.OriginalURL
 		}
 		if recievedURL.ShortCode != "" {
+			if len(recievedURL.ShortCode) != 5 {
+				c.JSON(400, gin.H{"status": "Request error", "error": "invalid shortened_url id"})
+				return
+			}
 			updates["short_code"] = recievedURL.ShortCode
 		}
 
