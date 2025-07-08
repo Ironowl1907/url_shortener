@@ -50,9 +50,16 @@ func Route(router *gin.Engine, dbConnection *gorm.DB) {
 		})
 	})
 	router.DELETE("/urls/:id", func(c *gin.Context) {
-		// id := c.Param("id")
-		c.JSON(501, gin.H{
-			"message": "DELETE /urls:id",
+		id := c.Param("id")
+
+		err := dbConnection.Delete(&ShortenedUrl{}, id).Error
+		if err != nil {
+			c.JSON(500, gin.H{"status": "Server error", "error": err})
+			return
+		}
+
+		c.JSON(200, gin.H{
+			"message": "deleted succesfully",
 		})
 	})
 	router.GET("/:shortCode", func(c *gin.Context) {
