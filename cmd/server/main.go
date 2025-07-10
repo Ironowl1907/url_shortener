@@ -1,31 +1,18 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/ironowl1907/url_shortener/internal/db"
-	"github.com/ironowl1907/url_shortener/internal/router"
+	"github.com/ironowl1907/url_shortener/internal/app"
 )
 
 func main() {
-	// Connect to the local instance of postgres
-	dbConnection, err := db.InitDB()
-	if err != nil {
-		panic("Couldn't Open Database")
+	app := app.NewApp()
+
+	if err := app.InitDB(); err != nil {
+		panic("Couldn't connect to database")
 	}
+	app.SetupRoutes()
 
-	// Routing with gin
-	ginRouter := gin.Default()
-
-	// Simple example for a endpoint
-	ginRouter.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-
-	// Application Routing
-	router.SetupRoutes(ginRouter, dbConnection)
-
-	// Run the server
-	ginRouter.Run()
+	if err := app.Run("8080"); err != nil {
+		panic("Couldn't run server")
+	}
 }
