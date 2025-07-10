@@ -11,145 +11,161 @@ import (
 	"gorm.io/gorm"
 )
 
+type URLHandler struct {
+	DB *gorm.DB
+}
+
+// NewURLHandler creates a new URLHandler instance
+func NewURLHandler(db *gorm.DB) *URLHandler {
+	return &URLHandler{DB: db}
+}
+
+// CreateURLHandler handles POST /urls
+func (h *URLHandler) CreateURLHandler(c *gin.Context) {
+	var incomeURL URLPost
+	if err := c.ShouldBindBodyWithJSON(&incomeURL); err != nil {
+		c.JSON(400, gin.H{"error": "Invalid JSON"})
+		return
+	}
+
+	if !incomeURL.IgnoreResponse {
+		response, err := http.Get(incomeURL.OriginalURL)
+		fmt.Println(incomeURL.IgnoreResponse)
+		if err != nil || response.StatusCode != 200 {
+			c.JSON(401, gin.H{"status": "warning, url not reachable", "url": incomeURL})
+			return
+		}
+	}
+
+	_, err := CreateURL(&incomeURL, h.DB)
+	if err != nil {
+		c.JSON(500, gin.H{"status": "Server error", "error": err.Error()})
+		return
+	}
+	c.JSON(200, gin.H{"status": "received", "url": incomeURL})
+}
+
+// GetAllURLsHandler handles GET /urls
+func (h *URLHandler) GetAllURLsHandler(c *gin.Context) {
+	var urls []ShortenedUrl
+	h.DB.Find(&urls)
+	c.JSON(200, urls)
+}
+
+// GetURLByIDHandler handles GET /urls/:id
+func (h *URLHandler) GetURLByIDHandler(c *gin.Context) {
+	id := c.Param("id")
+	var urls []ShortenedUrl
+	err := h.DB.Raw("SELECT * FROM shortened_urls WHERE id = ?", id).Scan(&urls).Error
+	if err != nil {
+		c.JSON(500, gin.H{"status": "Server error", "error": err})
+		return
+	}
+	c.JSON(200, urls)
+}
+
+// UpdateURLHandler handles PUT /urls/:id
+func (h *URLHandler) UpdateURLHandler(c *gin.Context) {
+	id := c.Param("id")
+	var receivedURL ShortenedUrl
+	var url ShortenedUrl
+
+	// Bind JSON to struct
+	if err := c.ShouldBindBodyWithJSON(&receivedURL); err != nil {
+		c.JSON(400, gin.H{"status": "incorrect fields", "error": err.Error()})
+		return
+	}
+
+	// Find existing URL record
+	if err := h.DB.First(&url, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"status": "URL not found"})
+			return
+		}
+		c.JSON(500, gin.H{"status": "Server error", "error": err.Error()})
+		return
+	}
+
+	// Prepare updates
+	updates := make(map[string]interface{})
+	if receivedURL.OriginalURL != "" {
+		updates["original_url"] = receivedURL.OriginalURL
+	}
+	if receivedURL.ShortCode != "" {
+		if len(receivedURL.ShortCode) != 5 {
+			c.JSON(400, gin.H{"status": "Request error", "error": "invalid shortened_url id"})
+			return
+		}
+		updates["short_code"] = receivedURL.ShortCode
+	}
+	updates["updated_at"] = time.Now()
+
+	// Apply updates
+	if err := h.DB.Model(&url).Updates(updates).Error; err != nil {
+		c.JSON(500, gin.H{"status": "Update failed", "error": err.Error()})
+		return
+	}
+
+	// Fetch updated record
+	if err := h.DB.First(&url, id).Error; err != nil {
+		c.JSON(500, gin.H{"status": "Server error", "error": err.Error()})
+		return
+	}
+
+	c.JSON(200, gin.H{"status": "success", "data": url})
+}
+
+// DeleteURLHandler handles DELETE /urls/:id
+func (h *URLHandler) DeleteURLHandler(c *gin.Context) {
+	id := c.Param("id")
+	err := h.DB.Delete(&ShortenedUrl{}, id).Error
+	if err != nil {
+		c.JSON(500, gin.H{"status": "Server error", "error": err})
+		return
+	}
+	c.JSON(200, gin.H{
+		"message": "deleted successfully",
+	})
+}
+
+// RedirectByShortCodeHandler handles GET /:shortCode
+func (h *URLHandler) RedirectByShortCodeHandler(c *gin.Context) {
+	shortCode := c.Param("shortCode")
+	var result struct {
+		OriginalURL string `gorm:"column:original_url"`
+	}
+
+	err := h.DB.Raw("SELECT original_url FROM shortened_urls WHERE short_code = ?",
+		shortCode).First(&result).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			fmt.Println("Short code not found for this URL")
+			c.JSON(404, gin.H{
+				"message": "Invalid code",
+			})
+		} else {
+			log.Printf("Database error: %v", err)
+			c.JSON(500, gin.H{
+				"message": "Internal server error",
+			})
+		}
+		return
+	}
+	c.Redirect(http.StatusMovedPermanently, result.OriginalURL)
+}
+
+// Route sets up all URL routes using the extracted handlers
 func Route(router *gin.Engine, dbConnection *gorm.DB) {
 	fmt.Println("Init url routing")
 
-	router.POST("/urls", func(c *gin.Context) {
-		var incomeURL URLPost
-		if err := c.ShouldBindBodyWithJSON(&incomeURL); err != nil {
-			c.JSON(400, gin.H{"error": "Invalid JSON"})
-			return
-		}
-		{
-			response, err := http.Get(incomeURL.OriginalURL)
-			fmt.Println(incomeURL.IgnoreResponse)
-			if !incomeURL.IgnoreResponse {
-				if err != nil || response.StatusCode != 200 {
-					c.JSON(401, gin.H{"status": "warning, url not reachable", "url": incomeURL})
-					return
-				}
-			}
-		}
+	// Create handler instance
+	urlHandler := NewURLHandler(dbConnection)
 
-		_, err := CreateURL(&incomeURL, dbConnection)
-		if err != nil {
-			c.JSON(500, gin.H{"status": "Server error", "error": err.Error()})
-			return
-		}
-
-		c.JSON(200, gin.H{"status": "received", "url": incomeURL})
-	})
-
-	router.GET("/urls", func(c *gin.Context) {
-		var urls []ShortenedUrl
-		dbConnection.Find(&urls)
-		c.JSON(200, urls)
-	})
-
-	router.GET("/urls/:id", func(c *gin.Context) {
-		id := c.Param("id")
-		var urls []ShortenedUrl
-		err := dbConnection.Raw("SELECT * FROM shortened_urls WHERE id = ?", id).Scan(&urls).Error
-		if err != nil {
-			c.JSON(500, gin.H{"status": "Server error", "error": err})
-			return
-		}
-		c.JSON(200, urls)
-	})
-
-	router.PUT("/urls/:id", func(c *gin.Context) {
-		id := c.Param("id")
-		var recievedURL ShortenedUrl
-		var url ShortenedUrl
-		{
-			err := c.ShouldBindBodyWithJSON(&recievedURL)
-			if err != nil {
-				c.JSON(400, gin.H{"status": "incorrect fields", "error": err.Error()})
-				return
-			}
-		}
-		{
-			err := dbConnection.First(&url, id).Error
-			if err != nil {
-				if errors.Is(err, gorm.ErrRecordNotFound) {
-					c.JSON(404, gin.H{"status": "URL not found"})
-					return
-				}
-				c.JSON(500, gin.H{"status": "Server error", "error": err.Error()})
-				return
-			}
-		}
-
-		updates := make(map[string]interface{})
-
-		if recievedURL.OriginalURL != "" {
-			updates["original_url"] = recievedURL.OriginalURL
-		}
-		if recievedURL.ShortCode != "" {
-			if len(recievedURL.ShortCode) != 5 {
-				c.JSON(400, gin.H{"status": "Request error", "error": "invalid shortened_url id"})
-				return
-			}
-			updates["short_code"] = recievedURL.ShortCode
-		}
-
-		updates["updated_at"] = time.Now()
-
-		{
-			err := dbConnection.Model(&url).Updates(updates).Error
-			if err != nil {
-				c.JSON(500, gin.H{"status": "Update failed", "error": err.Error()})
-				return
-			}
-		}
-
-		{
-			err := dbConnection.First(&url, id).Error
-			if err != nil {
-				c.JSON(500, gin.H{"status": "Server error", "error": err.Error()})
-				return
-			}
-		}
-
-		c.JSON(200, gin.H{"status": "success", "data": url})
-	})
-	router.DELETE("/urls/:id", func(c *gin.Context) {
-		id := c.Param("id")
-
-		err := dbConnection.Delete(&ShortenedUrl{}, id).Error
-		if err != nil {
-			c.JSON(500, gin.H{"status": "Server error", "error": err})
-			return
-		}
-
-		c.JSON(200, gin.H{
-			"message": "deleted succesfully",
-		})
-	})
-	router.GET("/:shortCode", func(c *gin.Context) {
-		id := c.Param("shortCode")
-
-		var result struct {
-			OriginalURL string `gorm:"column:original_url"`
-		}
-
-		err := dbConnection.Raw("SELECT original_url FROM shortened_urls WHERE short_code = ?",
-			id).First(&result).Error
-		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				fmt.Println("Short code not found for this URL")
-				c.JSON(404, gin.H{
-					"message": "Invalid code",
-				})
-			} else {
-				log.Printf("Database error: %v", err)
-				c.JSON(500, gin.H{
-					"message": "Internal server error",
-				})
-			}
-			return
-		}
-
-		c.Redirect(http.StatusMovedPermanently, result.OriginalURL)
-	})
+	// Register routes with extracted handlers
+	router.POST("/urls", urlHandler.CreateURLHandler)
+	router.GET("/urls", urlHandler.GetAllURLsHandler)
+	router.GET("/urls/:id", urlHandler.GetURLByIDHandler)
+	router.PUT("/urls/:id", urlHandler.UpdateURLHandler)
+	router.DELETE("/urls/:id", urlHandler.DeleteURLHandler)
+	router.GET("/:shortCode", urlHandler.RedirectByShortCodeHandler)
 }
