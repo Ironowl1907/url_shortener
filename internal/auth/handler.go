@@ -1,9 +1,15 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -59,9 +65,67 @@ func (h *AuthHandler) RegisterHandler(c *gin.Context) {
 }
 
 func (h *AuthHandler) LoginHandler(c *gin.Context) {
-	c.JSON(501, gin.H{
-		"message": "POST /auth/login",
-	})
+	// Get creadentials from body
+	var body struct {
+		Email    string
+		password string
+	}
+	err := c.Bind(&body)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"status": "failed to read body",
+		})
+		return
+	}
+	// DB lookup
+	var user User
+	response := h.DB.First(&user, "email = ?", body.Email)
+	if errors.Is(response.Error, gorm.ErrRecordNotFound) {
+		c.JSON(400, gin.H{
+			"status": "invalid email or password",
+		})
+		return
+	} else if response.Error != nil {
+		c.JSON(500, gin.H{
+			"status": "failed to read database",
+		})
+		return
+	}
+
+	// Verify password
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.password))
+	if err != nil {
+		c.JSON(400, gin.H{
+			"status": "invalid email or passoword",
+		})
+		return
+	}
+
+	// Generate JWT token
+
+	key := os.Getenv("SECRET")
+	if key == "" {
+		log.Fatal("failed to retrieve secret from .env file")
+	}
+
+	t := jwt.NewWithClaims(jwt.SigningMethodHS256,
+		jwt.MapClaims{
+			"sub": user.ID,
+			"exp": time.Now().Add(time.Hour * 24).Unix(),
+		})
+	s, err := t.SignedString([]byte(key))
+	if err != nil {
+		c.JSON(500, gin.H{
+			"status": "failed to create JWT",
+		})
+		log.Println(err.Error())
+		return
+	}
+
+	// Respond
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("JWT", s, 3600*24, "", "", false, true)
+	c.JSON(200, gin.H{})
 }
 
 func (h *AuthHandler) LogoutHandler(c *gin.Context) {
