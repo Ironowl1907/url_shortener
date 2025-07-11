@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -16,8 +17,44 @@ func NewAuthHandler(db *gorm.DB) *AuthHandler {
 }
 
 func (h *AuthHandler) RegisterHandler(c *gin.Context) {
-	c.JSON(501, gin.H{
-		"message": "POST /auth/register",
+	// Get email and password from json
+	var body struct {
+		Email    string
+		Name     string
+		password string
+	}
+	err := c.Bind(&body)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"status": "failed to read body",
+		})
+		return
+	}
+
+	// Hash the password
+	hash, err := bcrypt.GenerateFromPassword([]byte(body.password), 10)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"status": "failed to hash password",
+		})
+		return
+	}
+	// Create the user
+	user := User{Name: body.Name, Email: body.Email, Password: string(hash)}
+
+	result := h.DB.Create(&user)
+
+	if result.Error != nil {
+		c.JSON(500, gin.H{
+			"status": "failed to create user",
+		})
+		return
+	}
+
+	// Respond
+	c.JSON(200, gin.H{
+		"status": "ok",
+		"user":   user,
 	})
 }
 
