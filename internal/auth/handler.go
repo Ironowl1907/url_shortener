@@ -10,6 +10,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"github.com/ironowl1907/url_shortener/internal/middleware"
+	"github.com/ironowl1907/url_shortener/internal/models"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -46,7 +48,7 @@ func (h *AuthHandler) RegisterHandler(c *gin.Context) {
 		return
 	}
 	// Create the user
-	user := User{Name: body.Name, Email: body.Email, Password: string(hash)}
+	user := models.User{Name: body.Name, Email: body.Email, Password: string(hash)}
 
 	result := h.DB.Create(&user)
 
@@ -78,7 +80,7 @@ func (h *AuthHandler) LoginHandler(c *gin.Context) {
 		return
 	}
 	// DB lookup
-	var user User
+	var user models.User
 	response := h.DB.First(&user, "email = ?", body.Email)
 	if errors.Is(response.Error, gorm.ErrRecordNotFound) {
 		c.JSON(400, gin.H{
@@ -128,6 +130,12 @@ func (h *AuthHandler) LoginHandler(c *gin.Context) {
 	c.JSON(200, gin.H{})
 }
 
+func (h *AuthHandler) ValidateUser(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"message": "Logged In",
+	})
+}
+
 func (h *AuthHandler) LogoutHandler(c *gin.Context) {
 	c.JSON(501, gin.H{
 		"message": "POST /auth/logout",
@@ -160,6 +168,7 @@ func Route(router *gin.Engine, dbConnection *gorm.DB) {
 	router.POST("/auth/register", authHandler.RegisterHandler)
 	router.POST("/auth/login", authHandler.LoginHandler)
 	router.POST("/auth/logout", authHandler.LogoutHandler)
+	router.GET("/auth/validate", middleware.RequireAuth, authHandler.ValidateUser)
 	router.GET("/auth/me", authHandler.GetMeHandler)
 	router.PUT("/auth/me", authHandler.UpdateMeHandler)
 	router.DELETE("/auth/me", authHandler.DeleteMeHandler)

@@ -24,6 +24,7 @@ func main() {
 	if err := app.InitDB(); err != nil {
 		panic("Couldn't connect to database")
 	}
+
 	// Setup the routes
 	app.SetupRoutes()
 

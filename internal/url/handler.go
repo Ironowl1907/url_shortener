@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/ironowl1907/url_shortener/internal/models"
 	"gorm.io/gorm"
 )
 
@@ -22,7 +23,7 @@ func NewURLHandler(db *gorm.DB) *URLHandler {
 
 // CreateURLHandler handles POST /urls
 func (h *URLHandler) CreateURLHandler(c *gin.Context) {
-	var incomeURL URLPost
+	var incomeURL models.URLPost
 	if err := c.ShouldBindBodyWithJSON(&incomeURL); err != nil {
 		c.JSON(400, gin.H{"error": "Invalid JSON"})
 		return
@@ -47,7 +48,7 @@ func (h *URLHandler) CreateURLHandler(c *gin.Context) {
 
 // GetAllURLsHandler handles GET /urls
 func (h *URLHandler) GetAllURLsHandler(c *gin.Context) {
-	var urls []ShortenedUrl
+	var urls []models.ShortenedUrl
 	h.DB.Find(&urls)
 	c.JSON(200, urls)
 }
@@ -55,7 +56,7 @@ func (h *URLHandler) GetAllURLsHandler(c *gin.Context) {
 // GetURLByIDHandler handles GET /urls/:id
 func (h *URLHandler) GetURLByIDHandler(c *gin.Context) {
 	id := c.Param("id")
-	var urls []ShortenedUrl
+	var urls []models.ShortenedUrl
 	err := h.DB.Raw("SELECT * FROM shortened_urls WHERE id = ?", id).Scan(&urls).Error
 	if err != nil {
 		c.JSON(500, gin.H{"status": "Server error", "error": err})
@@ -67,8 +68,8 @@ func (h *URLHandler) GetURLByIDHandler(c *gin.Context) {
 // UpdateURLHandler handles PUT /urls/:id
 func (h *URLHandler) UpdateURLHandler(c *gin.Context) {
 	id := c.Param("id")
-	var receivedURL ShortenedUrl
-	var url ShortenedUrl
+	var receivedURL models.ShortenedUrl
+	var url models.ShortenedUrl
 
 	// Bind JSON to struct
 	if err := c.ShouldBindBodyWithJSON(&receivedURL); err != nil {
@@ -118,7 +119,7 @@ func (h *URLHandler) UpdateURLHandler(c *gin.Context) {
 // DeleteURLHandler handles DELETE /urls/:id
 func (h *URLHandler) DeleteURLHandler(c *gin.Context) {
 	id := c.Param("id")
-	err := h.DB.Delete(&ShortenedUrl{}, id).Error
+	err := h.DB.Delete(&models.ShortenedUrl{}, id).Error
 	if err != nil {
 		c.JSON(500, gin.H{"status": "Server error", "error": err})
 		return
