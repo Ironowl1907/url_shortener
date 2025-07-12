@@ -143,9 +143,10 @@ func (h *AuthHandler) LogoutHandler(c *gin.Context) {
 }
 
 func (h *AuthHandler) GetMeHandler(c *gin.Context) {
-	c.JSON(501, gin.H{
-		"message": "GET /auth/me",
-	})
+	// Get User from context
+	user := c.Keys["user"]
+	// Respond
+	c.JSON(200, user)
 }
 
 func (h *AuthHandler) UpdateMeHandler(c *gin.Context) {
@@ -169,7 +170,7 @@ func Route(router *gin.Engine, dbConnection *gorm.DB) {
 	router.POST("/auth/login", authHandler.LoginHandler)
 	router.POST("/auth/logout", authHandler.LogoutHandler)
 	router.GET("/auth/validate", middleware.RequireAuth, authHandler.ValidateUser)
-	router.GET("/auth/me", authHandler.GetMeHandler)
-	router.PUT("/auth/me", authHandler.UpdateMeHandler)
+	router.GET("/auth/me", middleware.RequireAuth, authHandler.GetMeHandler)
+	router.PUT("/auth/me", middleware.RequireAuth, authHandler.UpdateMeHandler)
 	router.DELETE("/auth/me", authHandler.DeleteMeHandler)
 }
