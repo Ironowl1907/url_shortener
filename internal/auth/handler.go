@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -39,6 +40,13 @@ func (h *AuthHandler) RegisterHandler(c *gin.Context) {
 		return
 	}
 
+	// Verify password
+	if len(body.password) < 8 {
+		c.JSON(400, gin.H{
+			"status": "password should be at least 8 characters",
+		})
+		return
+	}
 	// Hash the password
 	hash, err := bcrypt.GenerateFromPassword([]byte(body.password), 10)
 	if err != nil {
@@ -143,22 +151,123 @@ func (h *AuthHandler) LogoutHandler(c *gin.Context) {
 }
 
 func (h *AuthHandler) GetMeHandler(c *gin.Context) {
-	// Get User from context
-	user := c.Keys["user"]
+	// Get user from context
+	user, ok := c.Keys["user"].(models.User)
+	if !ok {
+		c.JSON(400, gin.H{
+			"status": "failed to get user from context",
+		})
+		return
+	}
 	// Respond
 	c.JSON(200, user)
 }
 
 func (h *AuthHandler) UpdateMeHandler(c *gin.Context) {
-	c.JSON(501, gin.H{
-		"message": "PUT /auth/me",
+	// Get user from context
+	user, ok := c.Keys["user"].(models.User)
+	if !ok {
+		c.JSON(400, gin.H{
+			"status": "failed to get user from context",
+		})
+		return
+	}
+
+	// Parse json
+	var body struct {
+		Email    string `json:"email"`
+		Name     string `json:"name"`
+		Password string `json:"password"`
+	}
+
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"status": "failed to read body",
+			"error":  err.Error(),
+		})
+		return
+	}
+
+	// Validate input
+	if body.Email == "" && body.Name == "" && body.Password == "" {
+		c.JSON(400, gin.H{
+			"status": "no fields provided for update",
+		})
+		return
+	}
+
+	// Email validation (basic)
+	if body.Email != "" {
+		if !isValidEmail(body.Email) {
+			c.JSON(400, gin.H{
+				"status": "invalid email format",
+			})
+			return
+		}
+	}
+
+	// Password validation
+	if body.Password != "" {
+		if len(body.Password) < 8 {
+			c.JSON(400, gin.H{
+				"status": "password must be at least 8 characters",
+			})
+			return
+		}
+	}
+
+	// Update fields
+	if body.Email != "" {
+		user.Email = body.Email
+	}
+	if body.Name != "" {
+		user.Name = body.Name
+	}
+	if body.Password != "" {
+		hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), 10)
+		if err != nil {
+			c.JSON(500, gin.H{
+				"status": "failed to hash password",
+			})
+			return
+		}
+		user.Password = string(hash)
+	}
+
+	// DB submit
+	response := h.DB.Save(&user)
+	if response.Error != nil {
+		c.JSON(500, gin.H{
+			"status": "failed to update database",
+			"error":  response.Error.Error(),
+		})
+		return
+	}
+
+	userResponse := struct {
+		ID    uint   `json:"id"`
+		Email string `json:"email"`
+		Name  string `json:"name"`
+	}{
+		ID:    user.ID,
+		Email: user.Email,
+		Name:  user.Name,
+	}
+
+	c.JSON(200, gin.H{
+		"status": "user updated successfully",
+		"user":   userResponse,
 	})
 }
 
+// Helper function for email validation
+func isValidEmail(email string) bool {
+	// Should user a more robust solution
+	return strings.Contains(email, "@") && strings.Contains(email, ".")
+}
+
 func (h *AuthHandler) DeleteMeHandler(c *gin.Context) {
-	c.JSON(501, gin.H{
-		"message": "DELETE /auth/me",
-	})
 }
 
 func Route(router *gin.Engine, dbConnection *gorm.DB) {
@@ -168,9 +277,9 @@ func Route(router *gin.Engine, dbConnection *gorm.DB) {
 
 	router.POST("/auth/register", authHandler.RegisterHandler)
 	router.POST("/auth/login", authHandler.LoginHandler)
-	router.POST("/auth/logout", authHandler.LogoutHandler)
+	router.POST("/auth/logout", middleware.RequireAuth, authHandler.LogoutHandler)
 	router.GET("/auth/validate", middleware.RequireAuth, authHandler.ValidateUser)
 	router.GET("/auth/me", middleware.RequireAuth, authHandler.GetMeHandler)
 	router.PUT("/auth/me", middleware.RequireAuth, authHandler.UpdateMeHandler)
-	router.DELETE("/auth/me", authHandler.DeleteMeHandler)
+	router.DELETE("/auth/me", middleware.RequireAuth, authHandler.DeleteMeHandler)
 }
