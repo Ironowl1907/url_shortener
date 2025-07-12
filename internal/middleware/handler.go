@@ -39,7 +39,7 @@ func RequireAuth(c *gin.Context) {
 		var user models.User
 		response := DB.First(&user, claims["sub"].(float64))
 		if response.Error != nil {
-			c.AbortWithError(403, err)
+			c.AbortWithError(403, response.Error)
 		}
 
 		// Attach to req

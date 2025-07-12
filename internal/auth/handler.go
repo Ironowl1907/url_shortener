@@ -268,6 +268,21 @@ func isValidEmail(email string) bool {
 }
 
 func (h *AuthHandler) DeleteMeHandler(c *gin.Context) {
+	// Get user from context
+	user, ok := c.Keys["user"].(models.User)
+	if !ok {
+		c.JSON(400, gin.H{
+			"status": "failed to get user from context",
+		})
+		return
+	}
+	// Delete from  DB
+	h.DB.Delete(&user)
+
+	// Respond
+	c.JSON(200, gin.H{
+		"status": "deleted successfully",
+	})
 }
 
 func Route(router *gin.Engine, dbConnection *gorm.DB) {
