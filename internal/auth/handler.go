@@ -148,6 +148,7 @@ func (h *AuthHandler) LogoutHandler(c *gin.Context) {
 	c.JSON(501, gin.H{
 		"message": "POST /auth/logout",
 	})
+	// TODO: Reliable way for unauthorizing JWT
 }
 
 func (h *AuthHandler) GetMeHandler(c *gin.Context) {
