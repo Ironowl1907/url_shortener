@@ -4,6 +4,7 @@ import (
 	"log"
 	"math/rand"
 
+	"github.com/ironowl1907/url_shortener/internal/models"
 	"gorm.io/gorm"
 )
 
@@ -19,8 +20,8 @@ func RandSeq(n int) string {
 	return string(res)
 }
 
-func CreateURL(url *URLPost, dbConnection *gorm.DB) (*ShortenedUrl, error) {
-	shortenedURL := &ShortenedUrl{
+func CreateURL(url *models.URLPost, dbConnection *gorm.DB) (*models.ShortenedUrl, error) {
+	shortenedURL := &models.ShortenedUrl{
 		OriginalURL: url.OriginalURL,
 		ShortCode:   RandSeq(5),
 	}

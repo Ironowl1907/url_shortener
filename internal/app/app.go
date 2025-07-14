@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/ironowl1907/url_shortener/internal/db"
+	"github.com/ironowl1907/url_shortener/internal/middleware"
 	"github.com/ironowl1907/url_shortener/internal/router"
 	"gorm.io/gorm"
 )
@@ -27,6 +28,7 @@ func (app *App) InitDB() error {
 	if err != nil {
 		return err
 	}
+	middleware.SetDB(app.DB)
 	return nil
 }
 
