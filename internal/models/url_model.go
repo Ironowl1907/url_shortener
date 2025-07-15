@@ -10,11 +10,12 @@ type ShortenedUrl struct {
 	ShortCode   string    `gorm:"unique;not null" json:"short_code"`
 	CreatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
-	// UserOwner   *user.User `gorm:"foreignKey:Owner;references:ID;constraint:OnDelete:SET NULL"` // Relationship
+	OwnerID     uint      `gorm:"not null" json:"owner_id"`
+	Owner       User      `gorm:"foreignKey:OwnerID;references:ID;constraint:OnDelete:CASCADE" json:"owner"`
 }
 
 type URLPost struct {
 	OriginalURL    string `json:"url"`
-	Owner          *uint  `json:"owner"`
+	Owner          uint   `json:"-"`
 	IgnoreResponse bool   `json:"ignore_response"`
 }

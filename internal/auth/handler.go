@@ -30,7 +30,7 @@ func (h *AuthHandler) RegisterHandler(c *gin.Context) {
 	var body struct {
 		Email    string
 		Name     string
-		password string
+		Password string
 	}
 	err := c.Bind(&body)
 	if err != nil {
@@ -41,14 +41,15 @@ func (h *AuthHandler) RegisterHandler(c *gin.Context) {
 	}
 
 	// Verify password
-	if len(body.password) < 8 {
+	if len(body.Password) < 8 {
+		fmt.Println(body)
 		c.JSON(400, gin.H{
 			"status": "password should be at least 8 characters",
 		})
 		return
 	}
 	// Hash the password
-	hash, err := bcrypt.GenerateFromPassword([]byte(body.password), 10)
+	hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), 10)
 	if err != nil {
 		c.JSON(500, gin.H{
 			"status": "failed to hash password",
@@ -78,7 +79,7 @@ func (h *AuthHandler) LoginHandler(c *gin.Context) {
 	// Get creadentials from body
 	var body struct {
 		Email    string
-		password string
+		Password string
 	}
 	err := c.Bind(&body)
 	if err != nil {
@@ -103,7 +104,7 @@ func (h *AuthHandler) LoginHandler(c *gin.Context) {
 	}
 
 	// Verify password
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
 	if err != nil {
 		c.JSON(400, gin.H{
 			"status": "invalid email or passoword",
