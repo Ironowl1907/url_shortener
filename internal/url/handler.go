@@ -104,8 +104,18 @@ func validateURLReachability(urlStr string) error {
 
 // GetAllURLsHandler handles GET /urls
 func (h *URLHandler) GetAllURLsHandler(c *gin.Context) {
+	var ok bool
+	var owner models.User
+
+	// Extract user from context
+	owner, ok = c.Keys["user"].(models.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "unable to read user"})
+		return
+	}
+
 	var urls []models.ShortenedUrl
-	h.DB.Find(&urls)
+	h.DB.Where("owner_id = ?", owner.ID).Find(&urls)
 	c.JSON(200, urls)
 }
 
@@ -220,7 +230,7 @@ func Route(router *gin.Engine, dbConnection *gorm.DB) {
 
 	// Register routes with extracted handlers
 	router.POST("/urls", middleware.RequireAuth, urlHandler.CreateURLHandler)
-	router.GET("/urls", urlHandler.GetAllURLsHandler)
+	router.GET("/urls", middleware.RequireAuth, urlHandler.GetAllURLsHandler)
 	router.GET("/urls/:id", urlHandler.GetURLByIDHandler)
 	router.PUT("/urls/:id", urlHandler.UpdateURLHandler)
 	router.DELETE("/urls/:id", urlHandler.DeleteURLHandler)
