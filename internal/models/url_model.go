@@ -11,7 +11,7 @@ type ShortenedUrl struct {
 	CreatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 	OwnerID     uint      `gorm:"not null" json:"owner_id"`
-	Owner       User      `gorm:"foreignKey:OwnerID;references:ID;constraint:OnDelete:CASCADE" json:"owner"`
+	Owner       User      `gorm:"foreignKey:OwnerID;references:ID;constraint:OnDelete:CASCADE" json:"-"`
 }
 
 type URLPost struct {

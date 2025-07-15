@@ -121,14 +121,22 @@ func (h *URLHandler) GetAllURLsHandler(c *gin.Context) {
 
 // GetURLByIDHandler handles GET /urls/:id
 func (h *URLHandler) GetURLByIDHandler(c *gin.Context) {
-	id := c.Param("id")
-	var urls []models.ShortenedUrl
-	err := h.DB.Raw("SELECT * FROM shortened_urls WHERE id = ?", id).Scan(&urls).Error
-	if err != nil {
-		c.JSON(500, gin.H{"status": "Server error", "error": err})
+	var ok bool
+	var owner models.User
+	// Extract user from context
+	owner, ok = c.Keys["user"].(models.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "unable to read user"})
 		return
 	}
-	c.JSON(200, urls)
+	id := c.Param("id")
+	var url models.ShortenedUrl
+	err := h.DB.Where("id = ?", id).Where("owner_id = ?", owner.ID).First(&url).Error
+	if err != nil {
+		c.JSON(500, gin.H{"status": "Server error", "error": err.Error()})
+		return
+	}
+	c.JSON(200, url)
 }
 
 // UpdateURLHandler handles PUT /urls/:id
@@ -231,8 +239,8 @@ func Route(router *gin.Engine, dbConnection *gorm.DB) {
 	// Register routes with extracted handlers
 	router.POST("/urls", middleware.RequireAuth, urlHandler.CreateURLHandler)
 	router.GET("/urls", middleware.RequireAuth, urlHandler.GetAllURLsHandler)
-	router.GET("/urls/:id", urlHandler.GetURLByIDHandler)
-	router.PUT("/urls/:id", urlHandler.UpdateURLHandler)
-	router.DELETE("/urls/:id", urlHandler.DeleteURLHandler)
+	router.GET("/urls/:id", middleware.RequireAuth, urlHandler.GetURLByIDHandler)
+	router.PUT("/urls/:id", middleware.RequireAuth, urlHandler.UpdateURLHandler)
+	router.DELETE("/urls/:id", middleware.RequireAuth, urlHandler.DeleteURLHandler)
 	router.GET("/:shortCode", urlHandler.RedirectByShortCodeHandler)
 }
