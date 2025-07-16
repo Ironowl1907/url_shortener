@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -201,14 +202,55 @@ func (h *URLHandler) UpdateURLHandler(c *gin.Context) {
 
 // DeleteURLHandler handles DELETE /urls/:id
 func (h *URLHandler) DeleteURLHandler(c *gin.Context) {
-	id := c.Param("id")
-	err := h.DB.Delete(&models.ShortenedUrl{}, id).Error
-	if err != nil {
-		c.JSON(500, gin.H{"status": "Server error", "error": err})
+	var ok bool
+	var owner models.User
+
+	// Extract user from context
+	owner, ok = c.Keys["user"].(models.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "unable to read user"})
 		return
 	}
-	c.JSON(200, gin.H{
-		"message": "deleted successfully",
+
+	// Get and validate ID parameter
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID parameter is required"})
+		return
+	}
+
+	// Convert string ID to appropriate type if needed (assuming uint)
+	var urlID uint
+	if parsedID, err := strconv.ParseUint(id, 10, 32); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		return
+	} else {
+		urlID = uint(parsedID)
+	}
+
+	// First check if the record exists and belongs to the user
+	var url models.ShortenedUrl
+	err := h.DB.Where("id = ? AND owner_id = ?", urlID, owner.ID).First(&url).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "URL not found or you don't have permission to delete it"})
+		return
+	}
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		return
+	}
+
+	// Now delete the record
+	err = h.DB.Delete(&url).Error
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete URL"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "URL deleted successfully",
 	})
 }
 
