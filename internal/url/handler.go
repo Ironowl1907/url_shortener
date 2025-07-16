@@ -141,6 +141,15 @@ func (h *URLHandler) GetURLByIDHandler(c *gin.Context) {
 
 // UpdateURLHandler handles PUT /urls/:id
 func (h *URLHandler) UpdateURLHandler(c *gin.Context) {
+	var ok bool
+	var owner models.User
+	// Extract user from context
+	owner, ok = c.Keys["user"].(models.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "unable to read user"})
+		return
+	}
+
 	id := c.Param("id")
 	var receivedURL models.ShortenedUrl
 	var url models.ShortenedUrl
@@ -152,7 +161,7 @@ func (h *URLHandler) UpdateURLHandler(c *gin.Context) {
 	}
 
 	// Find existing URL record
-	if err := h.DB.First(&url, id).Error; err != nil {
+	if err := h.DB.Where("owner_id = ?", owner.ID).First(&url, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(404, gin.H{"status": "URL not found"})
 			return
