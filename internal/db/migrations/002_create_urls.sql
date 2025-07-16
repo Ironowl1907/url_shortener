@@ -3,9 +3,10 @@ CREATE TABLE "shortened_urls" (
     original_url TEXT NOT NULL,
     short_code VARCHAR(16) NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    -- owner INT,
-    -- CONSTRAINT fk_owner FOREIGN KEY (owner)
-    --     REFERENCES "user"(id)
-    --     ON DELETE SET NULL
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    owner_id BIGINT NOT NULL,
+    CONSTRAINT fk_shortened_urls_owner FOREIGN KEY (owner_id)
+        REFERENCES "users"(id)
+        ON DELETE CASCADE
 );
+
