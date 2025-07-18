@@ -25,6 +25,8 @@ func CreateURL(url *models.URLPost, dbConnection *gorm.DB) (*models.ShortenedUrl
 		OriginalURL: url.OriginalURL,
 		ShortCode:   RandSeq(5),
 		OwnerID:     url.Owner,
+		Title:       url.Title,
+		Description: url.Description,
 	}
 
 	result := dbConnection.Create(shortenedURL)

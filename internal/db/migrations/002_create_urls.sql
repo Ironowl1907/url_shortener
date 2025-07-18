@@ -5,6 +5,8 @@ CREATE TABLE "shortened_urls" (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     owner_id BIGINT NOT NULL,
+    title TEXT,
+    description TEXT,
     CONSTRAINT fk_shortened_urls_owner FOREIGN KEY (owner_id)
         REFERENCES "users"(id)
         ON DELETE CASCADE
