@@ -32,8 +32,8 @@ declare module '$env/static/private' {
 	export const COLORTERM: string;
 	export const HYPRLAND_CMD: string;
 	export const npm_config_cache: string;
-	export const CLUTTER_BACKEND: string;
 	export const XDG_BACKEND: string;
+	export const CLUTTER_BACKEND: string;
 	export const ZSH_CACHE_DIR: string;
 	export const QT_WAYLAND_DISABLE_WINDOWDECORATION: string;
 	export const _P9K_TTY: string;
@@ -44,16 +44,16 @@ declare module '$env/static/private' {
 	export const LIBVA_DRIVER_NAME: string;
 	export const DESKTOP_SESSION: string;
 	export const ELECTRON_OZONE_PLATFORM_HINT: string;
-	export const HL_INITIAL_WORKSPACE_TOKEN: string;
 	export const KITTY_PID: string;
-	export const XCURSOR_SIZE: string;
+	export const HL_INITIAL_WORKSPACE_TOKEN: string;
 	export const npm_config_globalconfig: string;
+	export const XCURSOR_SIZE: string;
 	export const EDITOR: string;
 	export const PMSPEC: string;
 	export const XDG_SEAT: string;
 	export const PWD: string;
-	export const XDG_SESSION_DESKTOP: string;
 	export const LOGNAME: string;
+	export const XDG_SESSION_DESKTOP: string;
 	export const QT_QPA_PLATFORMTHEME: string;
 	export const XDG_SESSION_TYPE: string;
 	export const npm_config_init_module: string;
@@ -77,8 +77,8 @@ declare module '$env/static/private' {
 	export const npm_config_npm_version: string;
 	export const ZPFX: string;
 	export const XDG_SESSION_CLASS: string;
-	export const TERM: string;
 	export const TERMINFO: string;
+	export const TERM: string;
 	export const npm_package_name: string;
 	export const npm_config_prefix: string;
 	export const USER: string;
@@ -113,6 +113,7 @@ declare module '$env/static/private' {
 	export const npm_config_engine_strict: string;
 	export const OLDPWD: string;
 	export const HYPRCURSOR_SIZE: string;
+	export const NODE_ENV: string;
 }
 
 /**
@@ -150,8 +151,8 @@ declare module '$env/dynamic/private' {
 		COLORTERM: string;
 		HYPRLAND_CMD: string;
 		npm_config_cache: string;
-		CLUTTER_BACKEND: string;
 		XDG_BACKEND: string;
+		CLUTTER_BACKEND: string;
 		ZSH_CACHE_DIR: string;
 		QT_WAYLAND_DISABLE_WINDOWDECORATION: string;
 		_P9K_TTY: string;
@@ -162,16 +163,16 @@ declare module '$env/dynamic/private' {
 		LIBVA_DRIVER_NAME: string;
 		DESKTOP_SESSION: string;
 		ELECTRON_OZONE_PLATFORM_HINT: string;
-		HL_INITIAL_WORKSPACE_TOKEN: string;
 		KITTY_PID: string;
-		XCURSOR_SIZE: string;
+		HL_INITIAL_WORKSPACE_TOKEN: string;
 		npm_config_globalconfig: string;
+		XCURSOR_SIZE: string;
 		EDITOR: string;
 		PMSPEC: string;
 		XDG_SEAT: string;
 		PWD: string;
-		XDG_SESSION_DESKTOP: string;
 		LOGNAME: string;
+		XDG_SESSION_DESKTOP: string;
 		QT_QPA_PLATFORMTHEME: string;
 		XDG_SESSION_TYPE: string;
 		npm_config_init_module: string;
@@ -195,8 +196,8 @@ declare module '$env/dynamic/private' {
 		npm_config_npm_version: string;
 		ZPFX: string;
 		XDG_SESSION_CLASS: string;
-		TERM: string;
 		TERMINFO: string;
+		TERM: string;
 		npm_package_name: string;
 		npm_config_prefix: string;
 		USER: string;
@@ -231,6 +232,7 @@ declare module '$env/dynamic/private' {
 		npm_config_engine_strict: string;
 		OLDPWD: string;
 		HYPRCURSOR_SIZE: string;
+		NODE_ENV: string;
 		[key: `PUBLIC_${string}`]: undefined;
 		[key: `${string}`]: string | undefined;
 	}
