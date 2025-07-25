@@ -1,4 +1,5 @@
 <script lang="ts">
+	let { children } = $props();
 </script>
 
 <nav class="navbar">
@@ -12,6 +13,8 @@
 		<a href="/register">Register</a>
 	</div>
 </nav>
+
+{@render children()}
 
 <style>
 	.navbar {
