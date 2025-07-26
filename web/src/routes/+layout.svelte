@@ -1,5 +1,5 @@
 <script lang="ts">
-	let { children } = $props();
+	let { children, data } = $props();
 </script>
 
 <nav class="navbar">
@@ -9,8 +9,13 @@
 
 	<div class="nav-links">
 		<a href="/">Home</a>
-		<a href="/login">Login</a>
-		<a href="/register">Register</a>
+		{#if data.isAuthenticated}
+			<a href="/dashboard">Dashboard</a>
+			<a href="/profile">Profile</a>
+		{:else}
+			<a href="/login">Login</a>
+			<a href="/register">Register</a>
+		{/if}
 	</div>
 </nav>
 

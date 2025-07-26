@@ -136,7 +136,7 @@ func (h *AuthHandler) LoginHandler(c *gin.Context) {
 	// Respond
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("JWT", s, 3600*24, "", "", false, true)
-	c.JSON(200, gin.H{})
+	c.JSON(200, gin.H{"auth_token": s})
 }
 
 func (h *AuthHandler) ValidateUser(c *gin.Context) {

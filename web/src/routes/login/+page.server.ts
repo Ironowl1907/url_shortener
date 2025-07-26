@@ -17,10 +17,9 @@ export const actions = {
       return fail(401, { error: err.message || 'Login failed' });
     }
 
-    const { token } = await res.json();
+    const { auth_token } = await res.json();
 
-    // Set secure, HTTP-only cookie
-    cookies.set('auth_token', token, {
+    cookies.set('JWT', auth_token, {
       httpOnly: true,
       path: '/',
       sameSite: 'lax',
