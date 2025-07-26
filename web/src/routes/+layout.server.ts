@@ -1,4 +1,6 @@
-export async function load({ cookies }) {
+import type { User, AuthData } from '$lib/types.js'
+
+export async function load({ cookies }): Promise<AuthData> {
   const authToken = cookies.get('JWT'); // Keep your original cookie name
 
   if (!authToken) {
@@ -18,7 +20,12 @@ export async function load({ cookies }) {
     });
 
     if (response.ok) {
-      const userData = await response.json();
+      const rawData = await response.json();
+      const userData: User = {
+        id: rawData.id.toString(),
+        user_name: rawData.user_name,
+        user_email: rawData.user_email
+      };
       return {
         user: userData,
         isAuthenticated: true

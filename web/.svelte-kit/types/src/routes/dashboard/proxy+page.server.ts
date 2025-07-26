@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { PageServerLoad } from './$types';
 import type { ShortenedUrl } from '$lib/types.js';
 
@@ -5,7 +6,7 @@ interface LoadResult {
   shortenedUrls: ShortenedUrl[] | null;
 }
 
-export const load: PageServerLoad = async ({ cookies }): Promise<LoadResult> => {
+export const load = async ({ cookies }: Parameters<PageServerLoad>[0]): Promise<LoadResult> => {
   const authToken = cookies.get('JWT');
 
   if (!authToken) {

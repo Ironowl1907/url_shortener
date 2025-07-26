@@ -19,7 +19,7 @@
 	</div>
 </nav>
 
-{@render children()}
+{@render children(data)}
 
 <style>
 	.navbar {
