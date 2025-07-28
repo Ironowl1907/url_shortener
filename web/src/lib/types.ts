@@ -13,7 +13,7 @@ export interface AuthData {
 
 export interface ShortenedUrl {
   id: number,
-  originalURl: string,
+  OriginalURL: string,
   ShortCode: string,
   CreatedAt: Date,
   UpdatedAt: Date,

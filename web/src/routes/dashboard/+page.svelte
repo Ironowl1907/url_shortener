@@ -1,8 +1,9 @@
-<script>
+<script lang="ts">
+	import type { ShortenedUrl } from '$lib/types';
+
 	let allProps = $props();
 	const user = $derived(allProps.data.user);
-	const urls = $derived(allProps.data.shortenedUrls);
-	console.log(allProps);
+	const urls: ShortenedUrl[] = $derived(allProps.data.shortenedUrls);
 </script>
 
 <div class="urls-container">
@@ -14,16 +15,16 @@
 				<div class="url-card">
 					<div class="url-info">
 						<h3 class="short-url">
-							<a href="http://localhost:8080/{url.short_code}" target="_blank">
-								localhost:8080/{url.short_code}
+							<a href="http://localhost:8080/{url.ShortCode}" target="_blank">
+								localhost:8080/{url.ShortCode}
 							</a>
 						</h3>
 						<p class="original-url">
 							<strong>Original:</strong>
-							<a href={url.original_url} target="_blank" title={url.original_url}>
-								{url.original_url.length > 50
-									? url.original_url.substring(0, 50) + '...'
-									: url.original_url}
+							<a href={url.OriginalURL} target="_blank" title={url.OriginalURL}>
+								{url.OriginalURL.length > 50
+									? url.OriginalURL.substring(0, 50) + '...'
+									: url.OriginalURL}
 							</a>
 						</p>
 						<div class="url-meta">
@@ -31,7 +32,7 @@
 								Created: {url.CreatedAt.toLocaleDateString()}
 							</span>
 							<span class="click-count">
-								Clicks: {url.click_count || 0}
+								<!-- Clicks: {url.click_count || 0} -->
 							</span>
 						</div>
 					</div>
@@ -39,7 +40,7 @@
 						<button
 							class="copy-btn"
 							onclick={() =>
-								navigator.clipboard.writeText(`http://localhost:8080/${url.short_code}`)}
+								navigator.clipboard.writeText(`http://localhost:8080/${url.ShortCode}`)}
 						>
 							Copy
 						</button>

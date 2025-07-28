@@ -28,6 +28,7 @@ export const load = async ({ cookies }: Parameters<PageServerLoad>[0]): Promise<
       const rawData = await response.json();
       const shortenedUrls: ShortenedUrl[] = rawData.map((item: any) => ({
         ...item,
+        OriginalURL: item.original_url,
         CreatedAt: new Date(item.CreatedAt),
         UpdatedAt: new Date(item.UpdatedAt),
       }));
