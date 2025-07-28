@@ -12,6 +12,7 @@
 	{#if urls && urls.length > 0}
 		<div class="urls-grid">
 			{#each urls as url}
+				{console.log(url)}
 				<div class="url-card">
 					<div class="url-info">
 						<h3 class="short-url">
