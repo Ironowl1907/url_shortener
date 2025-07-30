@@ -2,8 +2,8 @@ export interface User {
   id: number;
   user_name: string;
   user_email: string;
-  created_at?: string;
-  updated_at?: string;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 export interface AuthData {

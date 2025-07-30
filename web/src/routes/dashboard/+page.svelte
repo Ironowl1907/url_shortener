@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { ShortenedUrl } from '$lib/types';
 	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
 
 	let allProps = $props();
 	const user = $derived(allProps.data.user);
@@ -60,7 +61,12 @@
 	{:else}
 		<div class="no-urls">
 			<p>You haven't created any shortened URLs yet.</p>
-			<button class="create-btn">Create Your First URL</button>
+			<button
+				onclick={() => {
+					goto('dashboard/new');
+				}}
+				class="create-btn">Create Your First URL</button
+			>
 		</div>
 	{/if}
 </div>
