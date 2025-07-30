@@ -29,4 +29,4 @@ export const actions = {
 
     throw redirect(302, '/dashboard');
   },
-} satisfies Actions;
+};
