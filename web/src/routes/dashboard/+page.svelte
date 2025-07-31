@@ -10,6 +10,9 @@
 
 <div class="urls-container">
 	<h2>Your Shortened URLs</h2>
+	<div class="new-btn-container">
+		<a href="/dashboard/new" class="new-btn">New URL</a>
+	</div>
 	{#if urls && urls.length > 0}
 		<div class="urls-grid">
 			{#each urls as url}
@@ -71,6 +74,33 @@
 </div>
 
 <style>
+	.new-btn {
+		padding: 0.5rem 1rem;
+		border: none;
+		border-radius: 4px;
+		cursor: pointer;
+		font-size: 1rem;
+		font-family:
+			system-ui,
+			-apple-system,
+			sans-serif;
+		transition: background-color 0.2s ease;
+		background-color: #007bff;
+		color: white;
+		text-decoration: none;
+		display: inline-block;
+	}
+
+	.new-btn:hover {
+		background-color: #0056b3;
+	}
+
+	.new-btn-container {
+		display: flex;
+		justify-content: flex-end;
+		padding: 0.5rem;
+		margin-bottom: 0.5rem;
+	}
 	.urls-container {
 		max-width: 1200px;
 		margin: 2rem auto;
@@ -78,7 +108,7 @@
 	}
 	.urls-container h2 {
 		color: #333;
-		margin-bottom: 1.5rem;
+		margin-bottom: 0.5rem;
 		border-bottom: 2px solid #e0e0e0;
 		padding-bottom: 0.5rem;
 	}
@@ -150,6 +180,10 @@
 		cursor: pointer;
 		font-size: 0.9rem;
 		transition: background-color 0.2s ease;
+		font-family:
+			system-ui,
+			-apple-system,
+			sans-serif;
 	}
 	.copy-btn {
 		background-color: #10b981;
