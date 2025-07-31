@@ -13,12 +13,11 @@
 	{#if urls && urls.length > 0}
 		<div class="urls-grid">
 			{#each urls as url}
-				{console.log(url)}
 				<div class="url-card">
 					<div class="url-info">
 						<h3 class="short-url">
 							<a href="http://localhost:8080/{url.ShortCode}" target="_blank">
-								localhost:8080/{url.ShortCode}
+								{url.Title}
 							</a>
 						</h3>
 						<p class="original-url">
@@ -104,7 +103,7 @@
 	}
 	.short-url {
 		margin: 0 0 0.5rem 0;
-		font-size: 1.1rem;
+		font-size: 1.5rem;
 	}
 	.short-url a {
 		color: #2563eb;
