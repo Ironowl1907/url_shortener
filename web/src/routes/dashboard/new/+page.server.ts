@@ -22,8 +22,8 @@ export const actions = {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${authToken}`,
-          body: JSON.stringify({ url, description, title, ignore_response })
-        }
+        },
+        body: JSON.stringify({ url, description, title, ignore_response })
       });
       if (response.ok) {
         return { success: true };
