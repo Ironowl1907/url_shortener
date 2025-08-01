@@ -31,6 +31,9 @@ export const actions = {
 
       var res = await response.json()
       console.error('Failed to craete URL:', response.status, res);
+      if (response.status == 400) {
+        return fail(response.status, { noReachable: true });
+      }
       return fail(response.status, { error: 'Failed to create URL' });
 
     } catch (error) {

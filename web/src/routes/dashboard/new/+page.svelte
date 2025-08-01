@@ -1,7 +1,8 @@
-<script>
+<script lang="ts">
 	import { enhance } from '$app/forms';
 
 	let loading = false;
+	let form = null;
 </script>
 
 <form
@@ -11,10 +12,12 @@
 		loading = true;
 		return async ({ result, update }) => {
 			loading = false;
+			form = result;
 			await update();
 		};
 	}}
 >
+	{#if form?.noReachable}<p class="error">The email field is required</p>{/if}
 	<label>
 		Original URL
 		<input name="url" type="url" required placeholder="https://example.com" disabled={loading} />
