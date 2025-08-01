@@ -2,6 +2,7 @@ import type { PageServerLoad, Actions } from './$types';
 import type { ShortenedUrl } from '$lib/types.js';
 import { fail } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
+import { makeAuthenticatedRequest } from '$lib/utils.js'
 
 // Use environment variable for API base URL
 const API_BASE_URL = env.API_BASE_URL || 'http://localhost:8080';
@@ -21,21 +22,6 @@ interface ApiUrlResponse {
   updated_at: string;
 }
 
-// Helper function for authenticated API requests
-async function makeAuthenticatedRequest(
-  url: string,
-  authToken: string,
-  options: RequestInit = {}
-): Promise<Response> {
-  return fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${authToken}`,
-      ...options.headers,
-    }
-  });
-}
 
 // Transform API response to ShortenedUrl type
 function transformApiResponse(item: ApiUrlResponse): ShortenedUrl {
