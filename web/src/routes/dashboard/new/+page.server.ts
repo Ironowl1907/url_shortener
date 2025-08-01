@@ -1,5 +1,10 @@
-import { fail } from '@sveltejs/kit';
+import { fail, json } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
+import { makeAuthenticatedRequest } from '$lib/utils';
+import { env } from '$env/dynamic/private';
+
+
+const API_BASE_URL = env.API_BASE_URL || 'http://localhost:8080';
 
 export const actions = {
   newUrl: async ({ cookies, request }) => {
@@ -17,14 +22,9 @@ export const actions = {
 
     // Try post petition
     try {
-      const response = await fetch(`http://localhost:8080/urls`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
-        },
-        body: JSON.stringify({ url, description, title, ignore_response })
-      });
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/urls`, authToken, {
+        method: "POST", body: JSON.stringify({ url, description, title, ignore_response })
+      })
       if (response.ok) {
         return { success: true };
       }
