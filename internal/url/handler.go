@@ -24,7 +24,7 @@ func NewURLHandler(db *gorm.DB) *URLHandler {
 	return &URLHandler{DB: db}
 }
 
-// CreateURLHandler handles POST /urls
+// CreateURLHandler handhandlles POST /urls
 func (h *URLHandler) CreateURLHandler(c *gin.Context) {
 	var incomeURL models.URLPost
 	var ok bool
@@ -40,6 +40,7 @@ func (h *URLHandler) CreateURLHandler(c *gin.Context) {
 	// Bind and validate JSON input
 	if err := c.ShouldBindJSON(&incomeURL); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON format", "details": err.Error()})
+		log.Println("An error: ", err.Error())
 		return
 	}
 

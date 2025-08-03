@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -17,14 +18,24 @@ func SetDB(db *gorm.DB) {
 }
 
 func RequireAuth(c *gin.Context) {
-	// Get the cookie from Req
-	tokenString, err := c.Cookie("JWT")
-	if err != nil {
-		c.AbortWithError(403, err)
-		return
+	var tokenString string
+
+	// Try to get token from Authorization header first
+	authHeader := c.GetHeader("Authorization")
+	if authHeader != "" {
+		// Extract token from "Bearer <token>"
+		tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+	} else {
+		// Fallback to cookie if no Authorization header
+		var err error
+		tokenString, err = c.Cookie("JWT")
+		if err != nil {
+			c.AbortWithError(403, err)
+			return
+		}
 	}
 
-	// Decode and validate
+	// Rest of your validation logic remains the same
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte(os.Getenv("SECRET")), nil
 	})
@@ -34,17 +45,14 @@ func RequireAuth(c *gin.Context) {
 		if float64(time.Now().Unix()) > claims["exp"].(float64) {
 			c.AbortWithError(403, err)
 		}
-
 		// Find user with token sub
 		var user models.User
 		response := DB.First(&user, claims["sub"].(float64))
 		if response.Error != nil {
 			c.AbortWithError(403, response.Error)
 		}
-
 		// Attach to req
 		c.Set("user", user)
-
 		// Continue
 		c.Next()
 	} else {
