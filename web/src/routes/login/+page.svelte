@@ -10,7 +10,7 @@
 		<input name="password" type="password" placeholder="Password" required />
 		<button type="submit">Login</button>
 		{#if form?.error}
-			<p class="error">{form.error}</p>
+			<p class="error">{form.status}</p>
 		{/if}
 	</form>
 	<div class="footer">
