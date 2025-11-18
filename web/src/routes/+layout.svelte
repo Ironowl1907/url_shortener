@@ -44,4 +44,9 @@
 	.nav-links a:hover {
 		text-decoration: underline;
 	}
+
+	a {
+		color: black;
+		text-decoration: none;
+	}
 </style>

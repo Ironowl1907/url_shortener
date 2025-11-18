@@ -62,7 +62,7 @@
 	button {
 		width: 100%;
 		padding: 0.75rem;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		background: purple;
 		color: white;
 		border: none;
 		border-radius: 4px;
