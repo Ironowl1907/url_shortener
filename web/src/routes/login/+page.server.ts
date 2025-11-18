@@ -1,4 +1,8 @@
+import { env } from '$env/dynamic/private';
 import { redirect, fail } from '@sveltejs/kit';
+
+
+const API_BASE_URL = env.API_BASE_URL || 'http://localhost:8080';
 
 export const actions = {
 	login: async ({ request, cookies }) => {
@@ -6,7 +10,7 @@ export const actions = {
 		const email = form.get('email');
 		const password = form.get('password');
 
-		const res = await fetch('http://localhost:8080/auth/login', {
+		const res = await fetch(`${API_BASE_URL}/auth/login`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ email, password })

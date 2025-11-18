@@ -1,5 +1,9 @@
 import { redirect, fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
+import { env } from '$env/dynamic/private';
+
+
+const API_BASE_URL = env.API_BASE_URL || 'http://localhost:8080';
 
 export const actions = {
 	register: async ({ request, cookies }) => {
@@ -8,7 +12,7 @@ export const actions = {
 		const email = form.get('email');
 		const password = form.get('password');
 
-		const res = await fetch('http://localhost:8080/auth/register', {
+		const res = await fetch(`${API_BASE_URL}/auth/register`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ email, password, name })
