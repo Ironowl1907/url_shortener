@@ -3,15 +3,14 @@
 </script>
 
 <h1>Register</h1>
-
 <div class="body">
 	<form method="POST" action="?/register" class="Form">
 		<input name="email" placeholder="Email" required />
 		<input name="name" placeholder="Name" required />
 		<input name="password" type="password" placeholder="Password" required />
-		<button type="submit">Login</button>
+		<button type="submit">Register</button>
 		{#if form?.error}
-			<p class="error">{form.error}</p>
+			<p class="error">{form.message}</p>
 		{/if}
 	</form>
 </div>
