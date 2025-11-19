@@ -1,11 +1,10 @@
 import type { PageServerLoad, Actions } from './$types';
 import type { ShortenedUrl } from '$lib/types.js';
 import { fail } from '@sveltejs/kit';
-import { env } from '$env/dynamic/private';
+import { API_BASE_URL } from '$env/static/private';
 import { makeAuthenticatedRequest } from '$lib/utils.js'
 
 // Use environment variable for API base URL
-const API_BASE_URL = env.API_BASE_URL || 'http://localhost:8080';
 
 interface LoadResult {
 	shortenedUrls: ShortenedUrl[] | null;

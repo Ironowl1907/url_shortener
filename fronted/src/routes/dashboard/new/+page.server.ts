@@ -1,10 +1,8 @@
 import { fail, json } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { makeAuthenticatedRequest } from '$lib/utils';
-import { env } from '$env/dynamic/private';
+import { API_BASE_URL } from '$env/static/private';
 
-
-const API_BASE_URL = env.API_BASE_URL || 'http://localhost:8080';
 
 export const actions = {
 	newUrl: async ({ cookies, request }) => {

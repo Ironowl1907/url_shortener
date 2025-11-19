@@ -1,8 +1,6 @@
-import { env } from '$env/dynamic/private';
+import { API_BASE_URL } from '$env/static/private';
 import type { User, AuthData } from '$lib/types.js'
 
-
-const API_BASE_URL = env.API_BASE_URL || 'http://localhost:8080';
 
 export async function load({ cookies }): Promise<AuthData> {
 	const authToken = cookies.get('JWT'); // Keep your original cookie name

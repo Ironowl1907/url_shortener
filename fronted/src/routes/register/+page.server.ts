@@ -1,9 +1,7 @@
 import { redirect, fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
-import { env } from '$env/dynamic/private';
+import { API_BASE_URL } from '$env/static/private';
 
-
-const API_BASE_URL = env.API_BASE_URL || 'http://localhost:8080';
 
 export const actions = {
 	register: async ({ request, cookies }) => {
