@@ -50,3 +50,9 @@ cd frontend
 npm install
 npm run dev
 ```
+
+--- 
+# Endpoint testing (unix bash script)
+```
+bash CI.bash
+```
