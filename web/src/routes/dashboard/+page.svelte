@@ -2,7 +2,7 @@
 	import type { ShortenedUrl } from '$lib/types';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { env } from '$env/dynamic/private';
+	import { env } from '$env/dynamic/public';
 
 	let allProps = $props();
 	const user = $derived(allProps.data.user);
