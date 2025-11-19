@@ -2,20 +2,17 @@
 	export let form;
 </script>
 
-<h1>Login</h1>
-
+<h1>Register</h1>
 <div class="body">
-	<form method="POST" action="?/login">
+	<form method="POST" action="?/register" class="Form">
 		<input name="email" placeholder="Email" required />
+		<input name="name" placeholder="Name" required />
 		<input name="password" type="password" placeholder="Password" required />
-		<button type="submit">Login</button>
+		<button type="submit">Register</button>
 		{#if form?.error}
-			<p class="error">{form.error}</p>
+			<p class="error">{form.message}</p>
 		{/if}
 	</form>
-	<div class="footer">
-		No account? <a href="/register">Register</a>
-	</div>
 </div>
 
 <style>
@@ -62,7 +59,7 @@
 	button {
 		width: 100%;
 		padding: 0.75rem;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		background: purple;
 		color: white;
 		border: none;
 		border-radius: 4px;

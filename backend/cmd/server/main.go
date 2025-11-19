@@ -29,6 +29,10 @@ func main() {
 	app.SetupRoutes()
 
 	// Run the server
+	port := os.Getenv("PORT")
+	if port == "" {
+		panic("Empty .env PORT")
+	}
 	if err := app.Run(os.Getenv("PORT")); err != nil {
 		panic("Couldn't run server")
 	}

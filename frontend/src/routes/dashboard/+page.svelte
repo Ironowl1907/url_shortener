@@ -2,10 +2,12 @@
 	import type { ShortenedUrl } from '$lib/types';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
+	import { env } from '$env/dynamic/public';
 
 	let allProps = $props();
 	const user = $derived(allProps.data.user);
 	const urls: ShortenedUrl[] = $derived(allProps.data.shortenedUrls);
+	const apiBaseUrl = $derived(allProps.data.apiBaseUrl);
 </script>
 
 <div class="urls-container">
@@ -19,7 +21,7 @@
 				<div class="url-card">
 					<div class="url-info">
 						<h3 class="short-url">
-							<a href="http://localhost:8080/{url.ShortCode}" target="_blank">
+							<a href="{apiBaseUrl}/{url.ShortCode}" target="_blank">
 								{url.Title}
 							</a>
 						</h3>
@@ -43,8 +45,7 @@
 					<div class="url-actions">
 						<button
 							class="copy-btn"
-							onclick={() =>
-								navigator.clipboard.writeText(`http://localhost:8080/${url.ShortCode}`)}
+							onclick={() => navigator.clipboard.writeText(`${apiBaseUrl}/${url.ShortCode}`)}
 						>
 							Copy
 						</button>
