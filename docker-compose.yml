@@ -3,8 +3,40 @@ services:
     build: backend/.
     ports:
       - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
 
-  frontend: 
+  frontend:
     build: frontend/.
     ports:
-      - "3000:80"
+      - "80:3000"
+    networks:
+      - app-network
+
+  db:
+    ports:
+      - "5432:5432"
+    image: postgres
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_PASSWORD: verySecurePassword
+      POSTGRES_USER: postgres
+      POSTGRES_DB: url_shortener
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    networks:
+      - app-network
+    volumes:
+      - ./backend/internal/db/migrations:/docker-entrypoint-initdb.d:ro
+
+networks:
+  app-network:
+    driver: bridge
