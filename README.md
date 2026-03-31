@@ -33,12 +33,7 @@ SECRET="K9ERKFzBJ4am4MxcMwJKujcEsx42pT0w"
 
 ```
 # Deploying
+Make sure to be inside url_shotener/
 ```
-cd url_shortener
 docker compose up -d
-```
---- 
-# Endpoint testing (unix bash script)
-```
-bash CI.bash
 ```
