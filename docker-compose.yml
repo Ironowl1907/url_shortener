@@ -1,8 +1,6 @@
 services:
   backend:
     build: backend/.
-    ports:
-      - "8080:8080"
     depends_on:
       db:
         condition: service_healthy
@@ -13,12 +11,12 @@ services:
     build: frontend/.
     ports:
       - "80:3000"
+    environment:
+      API_BASE_URL: http://backend:8080
     networks:
       - app-network
 
   db:
-    ports:
-      - "5432:5432"
     image: postgres
     restart: always
     shm_size: 128mb
