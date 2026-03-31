@@ -23,36 +23,17 @@ cd url_shortener
 ## .env files (Required!)
 Example for `frontend/.env`:
 ```
-API_BASE_URL="http://localhost:8080"
+API_BASE_URL="http://backend:8080"
 ```
 Example for `backend/.env`:
 ```
 PORT=8080
-DB="host=localhost user=postgres dbname=url_shortener password=verySecurePassword port=5432"
+DB="host=db user=postgres dbname=url_shortener password=verySecurePassword port=5432"
 SECRET="K9ERKFzBJ4am4MxcMwJKujcEsx42pT0w"
-```
 
-Deploy the db:
 ```
-cd docker
+# Deploying
+Make sure to be inside url_shotener/
+```
 docker compose up -d
-```
-
-Deploy backend: 
-```
-cd backend
-go run ./cmd/server/main.go
-```
-
-Deploy frontend
-```
-cd frontend
-npm install
-npm run dev
-```
-
---- 
-# Endpoint testing (unix bash script)
-```
-bash CI.bash
 ```

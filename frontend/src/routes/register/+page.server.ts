@@ -10,6 +10,7 @@ export const actions = {
 		const email = form.get('email');
 		const password = form.get('password');
 
+		console.log("API URL: " + API_BASE_URL)
 		const res = await fetch(`${API_BASE_URL}/auth/register`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
